@@ -26,26 +26,21 @@ object ChiselSubtypeOf {
     import c.universe._
     val ta = implicitly[c.WeakTypeTag[A]]
     val tb = implicitly[c.WeakTypeTag[B]]
-    val x = q""
+    val empty = q""
 
     val va = ta.tpe.members
     val vb = tb.tpe.members
 
-    va.foreach(x => {
-      if (!x.isMethod || x.asTerm.isGetter) {
-        println(x.name, x.info)
+    vb.foreach(bval => {
+      if (bval.asTerm.isGetter) {
+        val aval = ta.tpe.member(TermName(bval.name.toString()))
+        if (aval.info != bval.info) {
+          c.error(empty.pos, s"${tb.tpe} is not a Chisel subset type of ${ta.tpe} (mismatch at ${tb.tpe}.${bval.name})")
+        }
       }
     })
-    // for (v <- va) {
-    //   println(va)
-    // }
 
-    // println(va)
-    // println(vb)
-
-    c.error(x.pos, "blah")
-
-    return x
+    return empty
   }
   implicit def genChisel[A, B]: ChiselSubtypeOf[A, B] = macro ChiselSubtypeOf.genChiselSubtypeOf[A, B]
 }
