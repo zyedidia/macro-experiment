@@ -26,6 +26,7 @@ object ChiselSubtypeOf {
     import c.universe._
 
     def subtypeOf(a: Type, b: Type): Boolean = {
+      println(a, b)
       if (a == NoType) {
         return false
       }
@@ -54,9 +55,6 @@ object ChiselSubtypeOf {
     val ta = implicitly[c.WeakTypeTag[A]]
     val tb = implicitly[c.WeakTypeTag[B]]
     val empty = q""
-
-    val va = ta.tpe.members
-    val vb = tb.tpe.members
 
     if (!subtypeOf(ta.tpe, tb.tpe)) {
       c.error(empty.pos, s"${tb.tpe} is not a Chisel subset type of ${ta.tpe}")
