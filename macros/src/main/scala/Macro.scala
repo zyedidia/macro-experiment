@@ -26,7 +26,6 @@ object ChiselSubtypeOf {
     import c.universe._
 
     def subtypeOf(a: Type, b: Type): Boolean = {
-      println(a, b)
       if (a == NoType) {
         return false
       }
