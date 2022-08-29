@@ -1,16 +1,23 @@
 
 import scala.language.experimental.macros
-import mymacros.Cool
+import mymacros.ChiselSubtypeOf
 
 object Top extends App {
-  def callOnCool[A](a: A)(implicit cool: Cool[A]): Unit = {
+  def callOnChisel[A, B](a: A, b: B)(implicit subtype: ChiselSubtypeOf[A, B]): Unit = {
     println(s"$a is cool!")
   }
-  callOnCool(Foo(3))
-  callOnCool(Bar("hi"))
+  callOnChisel(new Foo, new Bar)
 }
 
-case class Foo(x: Int)
+class A {
+  val a = 12
+}
 
-case class Bar(x: String)
+class Foo extends A {
+  val x = "hi"
+}
+
+class Bar {
+  val y = "bye"
+}
 
