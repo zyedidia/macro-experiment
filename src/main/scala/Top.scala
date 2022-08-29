@@ -11,7 +11,7 @@ object Top extends App {
   callOnChisel(new A, new B) // ok
   callOnChisel(new A, new C) // ok
   callOnChisel(new A, new A) // ok
-  callOnChisel(new A, new D) // error: D is not a Chisel subtype of A (mismatch at D.a)
+  callOnChisel(new A, new D) // error: D is not a Chisel subtype of A
   callOnChisel(new E, new A) // ok
 }
 

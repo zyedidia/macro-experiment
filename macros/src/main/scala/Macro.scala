@@ -24,6 +24,33 @@ trait ChiselSubtypeOf[A, B]
 object ChiselSubtypeOf {
   def genChiselSubtypeOf[A : c.WeakTypeTag, B : c.WeakTypeTag](c: Context): c.Tree = {
     import c.universe._
+
+    def subtypeOf(a: Type, b: Type): Boolean = {
+      if (a == NoType) {
+        return false
+      }
+
+      val va = a.members
+      val vb = b.members
+
+      for (bval <- vb) {
+        if (bval.isPublic) {
+          if (bval.isTerm && bval.asTerm.isGetter) {
+            val aval = a.member(TermName(bval.name.toString()))
+            if (!subtypeOf(aval.info, bval.info)) {
+              return false
+            }
+          } else if (!bval.isTerm) {
+            val aval = a.member(TypeName(bval.name.toString()))
+            if (aval.info != bval.info) {
+              return false
+            }
+          }
+        }
+      }
+      return true
+    }
+
     val ta = implicitly[c.WeakTypeTag[A]]
     val tb = implicitly[c.WeakTypeTag[B]]
     val empty = q""
@@ -31,14 +58,9 @@ object ChiselSubtypeOf {
     val va = ta.tpe.members
     val vb = tb.tpe.members
 
-    vb.foreach(bval => {
-      if (bval.asTerm.isGetter) {
-        val aval = ta.tpe.member(TermName(bval.name.toString()))
-        if (aval.info != bval.info) {
-          c.error(empty.pos, s"${tb.tpe} is not a Chisel subset type of ${ta.tpe} (mismatch at ${tb.tpe}.${bval.name})")
-        }
-      }
-    })
+    if (!subtypeOf(ta.tpe, tb.tpe)) {
+      c.error(empty.pos, s"${tb.tpe} is not a Chisel subset type of ${ta.tpe}")
+    }
 
     return empty
   }
